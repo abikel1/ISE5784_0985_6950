@@ -33,11 +33,6 @@ public class Point
                 (xyz.d3-p.xyz.d3)*(xyz.d3-p.xyz.d3);
     }
 
-    /**
-     * Hi
-     * @param p nwjx
-     * @return xn  j
-     */
     public double distance(Point p)
     {
         return Math.sqrt(distanceSquared(p));
