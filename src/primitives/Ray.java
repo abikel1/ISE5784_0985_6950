@@ -20,11 +20,6 @@ public class Ray
         this.direction = direction.normalize();
     }
 
-    /**
-     * Compares two Ray objects for equality.
-     * @param obj The object to compare with.
-     * @return true if the objects are equal, otherwise false.
-     */
     public boolean equals(Object obj) {
         if (this == obj) return true;
         return (obj instanceof Ray other)
