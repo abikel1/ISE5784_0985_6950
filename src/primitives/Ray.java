@@ -1,13 +1,39 @@
 package primitives;
-
+/**
+ * This class represents a ray in three-dimensional space.
+ */
 public class Ray
 {
-    final Point head;
-    final Vector direction;
+    // The starting point of the ray
+    final private Point head;
+    // The direction of the ray
+    final private Vector direction;
 
+    /**
+     * Constructs a new Ray object with the given starting point and direction.
+     * @param head The starting point of the ray.
+     * @param direction The direction of the ray.
+     */
     public Ray(Point head, Vector direction)
     {
         this.head = head;
-        this.direction = direction;
+        this.direction = direction.normalize();
+    }
+
+    /**
+     * Compares two Ray objects for equality.
+     * @param obj The object to compare with.
+     * @return true if the objects are equal, otherwise false.
+     */
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        return (obj instanceof Ray other)
+                && this.head.equals(other.head)
+                && this.direction.equals(other.direction);
+    }
+
+    @Override
+    public String toString() {
+        return "Ray:" + head.toString()+" "+direction.toString();
     }
 }
