@@ -28,7 +28,8 @@ public class Sphere extends RadialGeometry
      * @return Always returns null (not implemented).
      */
     @Override
-    public Vector getNormal(Point p) {
-        return null;
+    public Vector getNormal(Point p)
+    {
+        return (p.subtract(center));
     }
 }

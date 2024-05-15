@@ -6,8 +6,14 @@ import primitives.Vector;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Unit tests for the Plane class.
+ */
 class PlaneTest {
-    /** Test method for {@link geometries.Plane#Plane(primitives.Point...)}. */
+/** Test method for {@link geometries.Plane#Plane(primitives.Point...)}.*/
+    /**
+     * Tests the constructor of the Plane class.
+     */
     @Test
     void testConstructor() {
         // ============ Equivalence Partitions Tests ==============
@@ -21,25 +27,24 @@ class PlaneTest {
 
         // =============== Boundary Values Tests ==================
 
-        // TC02: First &amp; second points are merged
+        // TC02: First & second points are merged
         assertThrows(IllegalArgumentException.class, //
                 () -> {
                     new Plane(new Point(2, 1, 0), new Point(2, 1, 0), new Point(7, 1, 3));
-                }, "ERROR: first &amp; second points are merged");
+                }, "ERROR: first & second points are merged");
 
-        // TC03: first &amp; second points are on the same line
+        // TC03: First & second points are on the same line
         assertThrows(IllegalArgumentException.class, //
                 () -> new Plane(new Point(2, 1, 0), new Point(5, 0, 3), new Point(3.5, 0.5, 1.5)),
-                "ERROR: first &amp; second points are on the same line");
+                "ERROR: first & second points are on the same line");
     }
 
+    /**
+     * Test method for {@link geometries.Plane#getNormal(primitives.Point)}.
+     * Tests the getNormal method of the Plane class.
+     */
     @Test
-    void getNormal() {
-    }
-
-    @Test
-    void testGetNormal()
-    {
+    void testGetNormal() {
         Plane pln = new Plane(new Point(0, 0, 1), new Point(1, 0, 0), new Point(0, 1, 0));
         // ensure there are no exceptions
         assertDoesNotThrow(() -> pln.getNormal(new Point(0, 0, 1)), "");
@@ -48,6 +53,6 @@ class PlaneTest {
         // ensure |result| = 1
         assertEquals(1, result.length(), 0.00000001, "Plane's normal is not a unit vector");
         double sqrt3 = Math.sqrt(1d / 3);
-        assertEquals(new Vector(sqrt3, sqrt3, sqrt3), pln.getNormal(new Point(0, 0, 1)), "wrong normal to trinagle");
+        assertEquals(new Vector(sqrt3, sqrt3, sqrt3), pln.getNormal(new Point(0, 0, 1)), "wrong normal to triangle");
     }
 }

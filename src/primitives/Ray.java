@@ -5,9 +5,9 @@ package primitives;
 public class Ray
 {
     // The starting point of the ray
-    final Point head;
+    final public Point head;
     // The direction of the ray
-    final Vector direction;
+    final public Vector direction;
 
     /**
      * Constructs a new Ray object with the given starting point and direction.

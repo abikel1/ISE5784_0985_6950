@@ -6,14 +6,20 @@ import primitives.Vector;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Unit tests for the Sphere class.
+ */
 class SphereTest {
 
+    /**
+     * Test method for {@link geometries.Sphere#getNormal(primitives.Point)}.
+     * Tests the getNormal method of the Sphere class.
+     */
     @Test
-    void getNormal()
-    {
+    void testGetNormal() {
         // ============ Equivalence Partitions Tests ==============
-        // TC01: There is a simple single test here
-        Sphere sphere=new Sphere(1,new Point(0,0,0));
+        // TC01: Simple test for a normal vector on the sphere's surface
+        Sphere sphere = new Sphere(new Point(0, 0, 0), 1);
         // ensure there are no exceptions
         assertDoesNotThrow(() -> sphere.getNormal(new Point(0, 0, 1)), "");
         // generate the test result

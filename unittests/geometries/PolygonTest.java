@@ -6,14 +6,20 @@ import primitives.Vector;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Unit tests for the Polygon class.
+ */
 class PolygonTest {
     /**
      * Delta value for accuracy when comparing the numbers of type 'double' in
-     * assertEquals
+     * assertEquals.
      */
     private final double DELTA = 0.000001;
 
-    /** Test method for {@link geometries.Polygon#Polygon(primitives.Point...)}. */
+    /**
+     * Test method for {@link geometries.Polygon#Polygon(primitives.Point...)}.
+     * Tests the constructor of the Polygon class.
+     */
     @Test
     public void testConstructor() {
         // ============ Equivalence Partitions Tests ==============
@@ -47,21 +53,24 @@ class PolygonTest {
         assertThrows(IllegalArgumentException.class, //
                 () -> new Polygon(new Point(0, 0, 1), new Point(1, 0, 0), new Point(0, 1, 0),
                         new Point(0, 0.5, 0.5)),
-                "Constructed a polygon with vertix on a side");
+                "Constructed a polygon with vertex on a side");
 
         // TC11: Last point = first point
         assertThrows(IllegalArgumentException.class, //
                 () -> new Polygon(new Point(0, 0, 1), new Point(1, 0, 0), new Point(0, 1, 0), new Point(0, 0, 1)),
-                "Constructed a polygon with vertice on a side");
+                "Constructed a polygon with last point equal to the first point");
 
         // TC12: Co-located points
         assertThrows(IllegalArgumentException.class, //
                 () -> new Polygon(new Point(0, 0, 1), new Point(1, 0, 0), new Point(0, 1, 0), new Point(0, 1, 0)),
-                "Constructed a polygon with vertice on a side");
+                "Constructed a polygon with co-located points");
 
     }
 
-    /** Test method for {@link geometries.Polygon#getNormal(primitives.Point)}. */
+    /**
+     * Test method for {@link geometries.Polygon#getNormal(primitives.Point)}.
+     * Tests the getNormal method of the Polygon class.
+     */
     @Test
     public void testGetNormal() {
         // ============ Equivalence Partitions Tests ==============

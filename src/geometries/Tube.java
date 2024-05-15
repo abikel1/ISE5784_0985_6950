@@ -3,6 +3,9 @@ package geometries;
 import primitives.Point;
 import primitives.Ray;
 import primitives.Vector;
+
+import static primitives.Util.isZero;
+
 /**
  * The Tube class represents an infinite tube in 3D space, defined by its axis and radius.
  * It extends the RadialGeometry abstract class.
@@ -31,6 +34,13 @@ public class Tube extends RadialGeometry
     @Override
     public Vector getNormal(Point p)
     {
-        return null;
+        Vector dir = axis.direction;
+        Point p0 = axis.head;
+        double t = dir.dotProduct(p.subtract(p0));
+        if (isZero(t))
+            return p.subtract(p0).normalize();
+        Point point0 = p0.add(dir.scale(t));
+        return p.subtract(point0).normalize();
+
     }
 }

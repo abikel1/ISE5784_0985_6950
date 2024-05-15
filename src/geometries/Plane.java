@@ -31,8 +31,11 @@ public class Plane
      */
     public Plane(Point p1, Point p2, Point p3)
     {
-        normal=null;
         point=p1;
+        Vector u = p2.subtract(point);
+        Vector v = p3.subtract(point);
+        Vector n = u.crossProduct(v);
+        normal = n.normalize();
     }
 
     /**
