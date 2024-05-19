@@ -5,6 +5,7 @@ import java.util.List;
 import static primitives.Util.isZero;
 
 import primitives.Point;
+import primitives.Ray;
 import primitives.Vector;
 
 /**
@@ -82,4 +83,54 @@ public class Polygon implements Geometry {
     @Override
     public Vector getNormal(Point point) { return plane.getNormal(); }
 
+    @Override
+    public List<Point> findIntersections(Ray ray) {
+        // Check if the ray's start point is a vertex of the polygon, return null if so
+        Point rayP0 = ray.head;
+        for (int i = 0; i < vertices.size(); i++) {
+            if (rayP0.equals(this.vertices.get(i)))
+                return null;
+        }
+
+        // Calculate vectors from ray's start point to each vertex of the polygon
+        Vector[] vectorsToP0 = new Vector[this.vertices.size()];
+        for (int i = 0; i < vertices.size(); ++i) {
+            vectorsToP0[i] = this.vertices.get(i).subtract(rayP0);
+        }
+
+        // Calculate normal vectors for each edge of the polygon
+        Vector[] normalVectors = new Vector[this.vertices.size()];
+        try {
+            for (int i = 0; i < vertices.size(); ++i) {
+                normalVectors[i] = vectorsToP0[i].crossProduct(vectorsToP0[(i + 1) % vectorsToP0.length]).normalize();
+            }
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+
+        // Calculate dot products between the ray's direction and each normal vector
+        Vector rayDir = ray.direction;
+        double[] dotProdCal = new double[this.vertices.size()];
+        for (int i = 0; i < vertices.size(); ++i) {
+            dotProdCal[i] = rayDir.dotProduct(normalVectors[i]);
+            if (isZero(dotProdCal[i]))
+                return null;
+        }
+
+        // Check if all dot products are either positive or negative
+        boolean allPositive = true, allNegative = true;
+        for (int i = 0; i < vertices.size(); ++i) {
+            if (dotProdCal[i] < 0 && allPositive)
+                allPositive = false;
+            if (dotProdCal[i] > 0 && allNegative)
+                allNegative = false;
+        }
+
+        // If all dot products have the same sign, find intersections with the polygon's
+        // plane
+        if (allNegative || allPositive) {
+            return this.plane.findIntersections(ray);
+        }
+        return null;
+    }
 }

@@ -1,4 +1,7 @@
 package primitives;
+
+import static primitives.Util.isZero;
+
 /**
  * This class represents a ray in three-dimensional space.
  */
@@ -30,5 +33,20 @@ public class Ray
     @Override
     public String toString() {
         return "Ray:" + head.toString()+" "+direction.toString();
+    }
+    /**
+     *
+     * @param t
+     * @return If t is 0 the function returns head otherwise returns a new point which is head + vector direction * scalar
+     */
+    public Point getPoint(double t)
+    {
+        try {
+            if (isZero(t))
+                return head;
+            return head.add(direction.scale(t));
+        } catch (Exception e) {
+            return head;
+        }
     }
 }

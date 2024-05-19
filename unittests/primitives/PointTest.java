@@ -12,15 +12,16 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class PointTest {
 
-    Point p1 = new Point(1, 2, 3);
-    Point p2 = new Point(2, 4, 6);
-    Point p3 = new Point(2, 4, 5);
+    private final Point p1 = new Point(1, 2, 3);
+    private final Point p2 = new Point(2, 4, 6);
+    private final Point p3 = new Point(2, 4, 5);
 
-    Vector v1 = new Vector(1, 2, 3);
-    Vector v1Opposite = new Vector(-1, -2, -3);
-    Vector v2 = new Vector(-2, -4, -6);
-    Vector v3 = new Vector(0, 3, -2);
-    Vector v4 = new Vector(1, 2, 2);
+    private final Vector v1 = new Vector(1, 2, 3);
+    private final Vector v1Opposite = new Vector(-1, -2, -3);
+    private final Vector v2 = new Vector(-2, -4, -6);
+    private final Vector v3 = new Vector(0, 3, -2);
+    private final Vector v4 = new Vector(1, 2, 2);
+    private final double DELTA = 0.000001;
 
     /**
      * Test method for {@link primitives.Point#subtract(primitives.Point)}.
@@ -34,7 +35,9 @@ class PointTest {
 
         // =============== Boundary Values Tests ==================
         // TC11: Subtracting a point from itself should throw an exception
-        assertThrows(IllegalArgumentException.class, () -> { p1.subtract(p1); },
+        assertThrows(IllegalArgumentException.class, () -> {
+                    p1.subtract(p1);
+                },
                 "ERROR: (point - itself) does not throw an exception");
     }
 
@@ -59,10 +62,10 @@ class PointTest {
     void distanceSquared() {
         // ============ Equivalence Partitions Tests ==============
         // TC01: Distance squared to itself should be zero
-        assertEquals(p1.distanceSquared(p1), 0, 0.0001, "ERROR: point squared distance to itself is not zero");
+        assertEquals(p1.distanceSquared(p1), 0, DELTA, "ERROR: point squared distance to itself is not zero");
         // TC02: Correct squared distance calculation
-        assertEquals(p1.distanceSquared(p3), 9, 0.0001, "ERROR: squared distance between points is wrong");
-        assertEquals(p3.distanceSquared(p1), 9, 0.0001, "ERROR: squared distance between points is wrong");
+        assertEquals(p1.distanceSquared(p3), 9, DELTA, "ERROR: squared distance between points is wrong");
+        assertEquals(p3.distanceSquared(p1), 9, DELTA, "ERROR: squared distance between points is wrong");
     }
 
     /**
@@ -73,9 +76,9 @@ class PointTest {
     void distance() {
         // ============ Equivalence Partitions Tests ==============
         // TC01: Distance to itself should be zero
-        assertEquals(p1.distance(p1), 0, 0.0001, "ERROR: point distance to itself is not zero");
+        assertEquals(p1.distance(p1), 0, DELTA, "ERROR: point distance to itself is not zero");
         // TC02: Correct distance calculation
-        assertEquals(p1.distance(p3), 3, 0.0001, "ERROR: distance between points is wrong");
-        assertEquals(p3.distance(p1), 3, 0.0001, "ERROR: distance between points is wrong");
+        assertEquals(p1.distance(p3), 3, DELTA, "ERROR: distance between points is wrong");
+        assertEquals(p3.distance(p1), 3, DELTA, "ERROR: distance between points is wrong");
     }
 }

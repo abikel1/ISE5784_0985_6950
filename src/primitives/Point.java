@@ -80,4 +80,21 @@ public class Point
     public String toString() {
         return xyz.toString();
     }
+    /**
+     * get the x value of the point
+     *
+     * @return x coordinate value
+     */
+    public double getX() {
+        return xyz.d1;
+    }
+
+    /**
+     * get the y value of the point
+     *
+     * @return y coordinate value
+     */
+    public double getY() {
+        return xyz.d2;
+    }
 }
