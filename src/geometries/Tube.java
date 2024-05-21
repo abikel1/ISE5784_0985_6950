@@ -44,7 +44,6 @@ public class Tube extends RadialGeometry
             return p.subtract(p0).normalize();
         Point point0 = p0.add(dir.scale(t));
         return p.subtract(point0).normalize();
-
     }
 
     @Override

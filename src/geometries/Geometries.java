@@ -29,10 +29,10 @@ public class Geometries implements Intersectable
 
         for (Intersectable geo : geometries) { // run on list of geometries
             List<Point> otherIntersections = geo.findIntersections(ray); // find intersections of each geometry
-            if (!otherIntersections.isEmpty()) {
-                if (intersections.isEmpty()) // if no intersections were inserted yet
-                    intersections = new LinkedList<>(); // create a new LinkedList
-                intersections.addAll(otherIntersections); // insert all intersections
+            if (otherIntersections != null && !otherIntersections.isEmpty()) {
+                if (intersections == null)
+                    intersections = new LinkedList<>();// create a new LinkedList
+                intersections.addAll(otherIntersections);// insert all intersections
             }
         }
         return intersections; // return the list of intersections
