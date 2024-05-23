@@ -45,7 +45,7 @@ public class Camera implements Cloneable{
     }
 
     /**
-     * @return the vRight
+     * @return the v
      */
     public Vector getvRight() {
         return vRight;
