@@ -6,17 +6,19 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class RayTest
 {
-    Point p0=new Point(1,2,3);
-    Point p1=new Point(-2,0,-8);
-    Vector dir=new Vector(1,0,4);
 
     @Test
     void getPoint()
     {
+        Ray ray=new Ray(new Point(1,0,0),new Vector(1,0,0));
         // ============ Equivalence Partitions Tests ==============
-        assertEquals(p0.add(dir.scale(2)),new Point(3,2,11),"ERROR: calculation in the positive distance");
-        assertEquals(p0.add(dir.scale(-2)),new Point(-1,2,-5),"ERROR: calculation in the negative distance");
-        // =============== Boundary Values Tests =================
-        assertEquals(p1.add(dir.scale(2)),Point.ZERO,"ERROR: calculation is zero");
+        // TC01: Test for positive distance t>0
+        assertEquals(new Point(3,0,0), ray.getPoint(2), "ERROR: getPoint doesn't work for a positive distance");
+        // TC02:Test for negative distance t<0
+        assertEquals(new Point(-1,0,0), ray.getPoint(-2), "ERROR: getPoint doesn't work for a negative distance");
+        // =============== Boundary Values Tests ==================
+        // TC11:Test for 0 distance. t=0
+        assertEquals(new Point(1,0,0), ray.getPoint(0),
+                "ERROR: getPoint doesn't work for no distance, the head of the ray is the expected output");
     }
 }

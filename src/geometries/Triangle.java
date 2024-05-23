@@ -27,6 +27,9 @@ public class Triangle extends Polygon
     }
     public List<Point> findIntersections(Ray ray)
     {
+        List<Point> list= plane.findIntersections(ray);
+        if (list == null)
+            return null;
         // Check if the ray starts at one of the triangle's vertices
         Point rayP0 = ray.head;
         if (rayP0.equals(this.vertices.get(0)) || rayP0.equals(this.vertices.get(1))
