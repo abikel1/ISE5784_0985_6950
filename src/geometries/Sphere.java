@@ -48,13 +48,12 @@ public class Sphere extends RadialGeometry
         Vector u = center.subtract(ray.head);
         double tM = alignZero(ray.direction.dotProduct(u));
         double d = alignZero(Math.sqrt(u.lengthSquared() - tM * tM));
-        double sqrt = Math.sqrt(radius * radius - d * d);
-        double tH = alignZero(sqrt);
+        double tH = alignZero(Math.sqrt(radius * radius - d * d));
         double t1 = alignZero(tM + tH);
         double t2 = alignZero(tM - tH);
 
         // If there are no intersections, return null
-        if (d > radius || alignZero(sqrt) <= 0)
+        if (d > radius || alignZero(Math.sqrt(radius * radius - d * d)) <= 0)
             return null;
 
         if (t1 <= 0 && t2 <= 0)
