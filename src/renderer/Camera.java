@@ -1,9 +1,6 @@
 package renderer;
 
-import primitives.Point;
-import primitives.Ray;
-import primitives.Util;
-import primitives.Vector;
+import primitives.*;
 
 import java.util.MissingResourceException;
 
@@ -17,8 +14,9 @@ public class Camera implements Cloneable{
     private double width;
     private double height;
     private double distance;
-
     private Point viewPlanePC;
+    private ImageWriter imageWriter;
+    private RayTracerBase rayTracer;
 
     private Camera(){}
 
@@ -174,6 +172,11 @@ public class Camera implements Cloneable{
             if (camera.vUp == null) throw new MissingResourceException(missingArgMsg, className, "vUp - one of the direction vectors of the camera");
             if (camera.vTo == null) throw new MissingResourceException(missingArgMsg, className, "vTo - one of the direction vectors of the camera");
 
+            // Check if imageWriter and rayTracer are set
+            if (camera.imageWriter == null || camera.rayTracer == null) {
+                throw new MissingResourceException("ImageWriter or RayTracerBase is missing", className, missingArgMsg);
+            }
+
             // Calculate the right vector and normalize it
             camera.vRight = camera.vTo.crossProduct(camera.vUp).normalize();
 
@@ -201,5 +204,96 @@ public class Camera implements Cloneable{
                 throw new RuntimeException(e);
             }
         }
+        /**
+         * Sets the image writer of the Camera.
+         *
+         * @param i the ImageWriter to set
+         * @return the Builder object for chaining
+         */
+        public Builder setImageWriter(ImageWriter i) {
+            if (i == null) {
+                throw new IllegalArgumentException("ImageWriter cannot be null");
+            }
+            this.camera.imageWriter = i;
+            return this;
+        }
+
+        /**
+         * Sets the ray tracer of the Camera.
+         *
+         * @param r the RayTracerBase to set
+         * @return the Builder object for chaining
+         */
+        public Builder setRayTracer(RayTracerBase r) {
+            if (r == null) {
+                throw new IllegalArgumentException("RayTracerBase cannot be null");
+            }
+            this.camera.rayTracer = r;
+            return this;
+        }
+    }
+    /**
+     * Renders the image by iterating through each pixel in the image writer and
+     * casting a ray for each pixel, then writing the resulting color to the image
+     * writer. Throws a MissingResourceException if either the image writer or the
+     * ray tracer base are not set.
+     */
+    public Camera renderImage() throws UnsupportedOperationException {
+        if (imageWriter == null)
+            throw new UnsupportedOperationException("Camera resource not set");
+
+        if (rayTracer == null)
+            throw new UnsupportedOperationException("Camera resource not set");
+
+        int nX = imageWriter.getNx();
+        int nY = imageWriter.getNy();
+
+        for (int j = 0; j < nX; j++) {
+            for (int i = 0; i < nY; i++) {
+                Color color = castRay(j, i, nX, nY);
+                this.imageWriter.writePixel(j, i, color);
+            }
+        }
+        return this;
+    }
+    /**
+     * Casts a ray through the given pixel (i,j) on the view plane and returns the
+     * color that results from tracing the ray.
+     *
+     * @param i the x-coordinate of the pixel on the view plane
+     * @param j the y-coordinate of the pixel on the view plane
+     * @return the color resulting from tracing the ray through the given pixel
+     */
+    private Color castRay(int j, int i, int nX, int nY) {
+        Ray ray = constructRay(nX, nY, j, i);
+        return this.rayTracer.traceRay(ray);
+    }
+
+    /**
+     * Create grid of lines to draw the view plane
+     *
+     * @param interval - the interval between the lines
+     * @param color    - the color of the lines
+     * @throws MissingResourceException - if the image writer is null
+     */
+    public Camera printGrid(int interval, Color color) {
+        if (imageWriter == null)
+            throw new MissingResourceException("ERROR: The image writer is null", "Camera", "imageWriter");
+
+        int ny = imageWriter.getNy();
+        int nx = imageWriter.getNx();
+        for (int i = 0; i < ny; i++)
+            for (int j = 0; j < nx; j++)
+                if (i % interval == 0 || j % interval == 0)
+                    imageWriter.writePixel(j,i,color);
+        return this;
+    }
+    public Camera writeToImage() {
+        if (imageWriter == null) {
+            throw new MissingResourceException("ImageWriter field cannot be null", Camera.class.getName(), "");
+        }
+        // delegates the appropriate method of the ImageWriter.
+        imageWriter.writeToImage();
+        return this;
     }
 }

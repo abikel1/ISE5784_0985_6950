@@ -1,5 +1,7 @@
 package primitives;
 
+import java.util.List;
+
 import static primitives.Util.isZero;
 
 /**
@@ -48,5 +50,29 @@ public class Ray
         } catch (Exception e) {
             return head;
         }
+    }
+    /**
+     * In the points list - find the point with minimal distance from the ray head
+     * point and return it
+     *
+     * @param pointList list of intersection point
+     * @return the closet point to ray point (p0)
+     */
+    public Point findClosestPoint(List<Point> pointList) {
+        if (pointList == null || pointList.isEmpty())// if the list is empty
+            return null;
+
+        Point closestPoint = pointList.get(0); // begin with the first point
+        double min = head.distance(pointList.get(0)); // find the distance between the point
+
+        for (int i = 0; i < pointList.size(); i++) // run on the list
+        {
+            if (head.distance(pointList.get(i)) < min) // if there is a closer point update
+            {
+                min = head.distance(pointList.get(i));
+                closestPoint = pointList.get(i);
+            }
+        }
+        return closestPoint;
     }
 }
