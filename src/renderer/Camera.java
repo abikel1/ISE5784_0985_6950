@@ -130,7 +130,7 @@ public class Camera implements Cloneable{
         /**
          * Set the size of the view plane.
          *
-         * @param width  The width of the view plane.
+         * @param width The width of the view plane.
          * @param height The height of the view plane.
          * @return The Builder instance for method chaining.
          * @throws IllegalArgumentException if the input dimensions are not valid.
@@ -273,7 +273,7 @@ public class Camera implements Cloneable{
      * Create grid of lines to draw the view plane
      *
      * @param interval - the interval between the lines
-     * @param color    - the color of the lines
+     * @param color - the color of the lines
      * @throws MissingResourceException - if the image writer is null
      */
     public Camera printGrid(int interval, Color color) {

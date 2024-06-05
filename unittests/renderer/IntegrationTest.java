@@ -6,6 +6,8 @@ import geometries.*;
 import org.junit.jupiter.api.Test;
 import primitives.*;
 import renderer.Camera;
+import scene.Scene;
+
 import java.util.LinkedList;
 import java.util.List;
 
@@ -16,7 +18,10 @@ public class IntegrationTest
 {
 
     // Camera builder used for all tests with a default setup
+    private final Scene scene= new Scene("Test");
     private final Camera.Builder cameraBuilder = Camera.getBuilder()
+            .setImageWriter(new ImageWriter("output",100,100))
+            .setRayTracer(new SimpleRayTracer(scene))
             .setLocation(Point.ZERO)
             .setDirection(new Vector(0, 0, -1), new Vector(0, 1, 0))
             .setVpSize(3,3)

@@ -4,12 +4,16 @@ import org.junit.jupiter.api.Test;
 import primitives.Point;
 import primitives.Ray;
 import primitives.Vector;
+import scene.Scene;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class CameraTest {
     /** Camera builder for the tests */
+    private final Scene scene= new Scene("Test");
             private final Camera.Builder cameraBuilder = Camera.getBuilder()
+                    .setImageWriter(new ImageWriter("output",100,100))
+                    .setRayTracer(new SimpleRayTracer(scene))
  //           .setRayTracer(new SimpleRayTracer(new Scene("Test")))
     //          .setImageWriter(new ImageWriter("Test", 1, 1))
             .setLocation(Point.ZERO)
