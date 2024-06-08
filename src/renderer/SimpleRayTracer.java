@@ -7,48 +7,39 @@ import scene.Scene;
 
 import java.util.List;
 
-/**
- * The SimpleRayTracer class is a concrete implementation of the SimpleRayTracer
- * abstract class. This class is responsible for tracing rays in the scene and
- * calculating their color. The class implements the traceRay method, which
- * returns the color of the closest point of intersection with an object in the
- * scene. The class also implements the calcColor method, which calculates the
- * color at a given point in the scene.
- *
- * @author Ayala and Avital
-*
-*/
 public class SimpleRayTracer extends RayTracerBase{
+
     /**
-     * Constructs a RayTracerBasic object with the given scene.
+     * Constructs with one param.
      *
-     * @param scene the scene to be rendered.
+     * @param scene the scene to be traced
      */
     public SimpleRayTracer(Scene scene) {
         super(scene);
     }
 
     /**
-     * an inheritance function from base this function returns the color of the
-     * closest point to the ray.
-     *
-     * @param ray - the ray between camera and view plane
-     * @return the color - color of closest point
+     * Traces a ray through the scene and calculates the color at the point where the ray intersects with an object.
+     * @param ray the ray to trace through the scene
+     * @return the color at the point where the ray intersects with an object, or the background color if no intersection is found
      */
     @Override
-    public Color traceRay(Ray ray) {
-        List<Point> intersections = scene.geometries.findIntersections(ray);// find intersection point
-        if (intersections == null) // if there are no intersection points return color of background
+    public Color traceRay(Ray ray)
+    {
+        List<Point> intersections = scene.geometries.findIntersections(ray);
+        if(intersections == null)// check if there is no point in the intersection
             return scene.background;
-        Point closestPoint = ray.findClosestPoint(intersections);// find closest point between ray
-        return calcColor(closestPoint); // return the color of closestPoint
+        Point closetPoint = ray.findClosestPoint(intersections);// find the closet point to the head of the ray
+        return calcColor(closetPoint);// call the function that return the color of the point
     }
+
     /**
-     * calculate the scene color
-     * @param point
-     * @return the scene's ambient light
+     * Calculates the color of a point in the scene based on the ambient light present.
+     * @param point the point in the scene for which to calculate the color
+     * @return the color of the point based on the ambient light present
      */
-    private Color calcColor(Point point) {
-        return scene.background;
+    private Color calcColor(Point point)
+    {
+        return scene.ambientLight.getIntensity();
     }
 }
