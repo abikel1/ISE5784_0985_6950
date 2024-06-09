@@ -1,12 +1,14 @@
-package renderer;
+package lighting;
 
 import static java.awt.Color.*;
 
 import org.junit.jupiter.api.Test;
 
 import geometries.*;
-import lighting.*;
 import primitives.*;
+import renderer.Camera;
+import renderer.ImageWriter;
+import renderer.SimpleRayTracer;
 import scene.Scene;
 
 /**
@@ -24,7 +26,7 @@ public class LightsTests {
    private final Camera.Builder camera1                 = Camera.getBuilder()
       .setRayTracer(new SimpleRayTracer(scene1))
       .setLocation(new Point(0, 0, 1000))
-      .setDirection(Point.ZERO, Vector.Y)
+      .setDirection(Point.ZERO,new Vector.Y)
       .setVpSize(150, 150).setVpDistance(1000);
    /** Second camera builder for some of tests */
    private final Camera.Builder camera2                 = Camera.getBuilder()
@@ -192,5 +194,43 @@ public class LightsTests {
          .renderImage()
          .writeToImage();
    }
+   /**
+    * Tests multiple light sources in the sphere test.
+    */
+   @Test
+   void SphereMultiple() {
+      scene1.geometries.add(sphere);
+      scene1.lights.add(new DirectionalLight(new Color(400, 0, 0), new Vector(-1, 1, -1)));
+      scene1.lights
+              .add(new PointLight(new Color(500, 500, 0), new Point(0, 30, 10)).setKl(0.0000003).setKq(0.0000001));
+      scene1.lights.add(new SpotLight(new Color(0, 900, 0), new Point(-100, -70, 50), new Vector(1, -1, -2))
+              .setKl(0.0000000001).setKq(0.000000001));
+
+      ImageWriter imageWriter = new ImageWriter("lightSphereMultiple", 500, 500);
+      camera1.setImageWriter(imageWriter) //
+              .setRayTracer(new SimpleRayTracer(scene1)) //
+              .renderImage()//
+              .writeToImage();
+   }
+
+   /**
+    * Tests multiple light sources in the triangles test.
+    */
+   @Test
+   void trianglesMultiple() {
+      scene2.geometries.add(triangle1.setMaterial(new Material().setKd(0.5).setKs(0.5).setShininess(300)),
+              triangle2.setMaterial(new Material().setKd(0.5).setKs(0.5).setShininess(300)));
+      scene2.lights.add(new DirectionalLight(new Color(0, 255, 0), trianglesLightDirection));
+      scene2.lights.add(new PointLight(new Color(255, 0, 0), new Point(40, -70, -100)).setKl(0.0005).setKq(0.0005));
+      scene2.lights.add(new SpotLight(new Color(0, 0, 255), new Point(12, 0, 0), new Vector(0, -2, -1)) //
+              .setKl(0.0001).setKq(0.000005));
+
+      ImageWriter imageWriter = new ImageWriter("lightTrianglesMultiple", 500, 500);
+      camera2.setImageWriter(imageWriter) //
+              .setRayTracer(new SimpleRayTracer(scene2)) //
+              .renderImage() //
+              .writeToImage();
+   }
+
 
 }

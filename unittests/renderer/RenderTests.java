@@ -2,11 +2,11 @@ package renderer;
 
 import static java.awt.Color.*;
 
+import lighting.AmbientLight;
 import org.junit.jupiter.api.Test;
 
 import geometries.Sphere;
 import geometries.Triangle;
-import lighting.AmbientLight;
 import primitives.*;
 import scene.Scene;
 
