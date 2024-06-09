@@ -12,7 +12,7 @@ import static primitives.Util.isZero;
 /**
  * The Plane class represents a plane in 3D space, defined by a point on the plane and its normal vector.
  */
-public class Plane implements Geometry
+public class Plane extends Geometry
 {
     // A point on the plane
     final private Point point;
@@ -94,6 +94,32 @@ public class Plane implements Geometry
         } catch (Exception ex) {
             // p.subtract(rayP) is vector zero, which means the ray point is equal to the
             // plane point (ray start on plane)
+            return null;
+        }
+    }
+    /**
+     * Computes the intersection points of a given {@link Ray} with the plane. If
+     * the ray doesn't intersect the plane, the method returns null.
+     *
+     * @param ray the ray to intersect with the plane
+     * @return a list of intersection points if the ray intersects the plane, null
+     *         otherwise
+     */
+    @Override
+    public List<GeoPoint> findGeoIntersectionsHelper(Ray ray) {
+        // Calculate the dot product of the plane's normal vector with the ray's
+        // direction vector
+        double nv = normal.dotProduct(ray.direction);
+        if (isZero(nv)) { // if the dot product is zero, the ray is parallel to the plane and doesn't
+            // intersect
+            return null;
+        }
+        try {
+            // Calculate the parameter t at which the ray intersects the plane
+            Vector pSubtractP0 = point.subtract(ray.head);
+            double t = alignZero((normal.dotProduct(pSubtractP0)) / nv);
+            return t <= 0 ? null : List.of(new GeoPoint(this, ray.getPoint(t)));
+        } catch (Exception ex) { // if an exception occurs during the calculation, return null
             return null;
         }
     }

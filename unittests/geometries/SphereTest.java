@@ -2,7 +2,7 @@ package geometries;
 
 import org.junit.jupiter.api.Test;
 import java.util.List;
-import geometries.Sphere;
+
 import primitives.Point;
 import primitives.Ray;
 import primitives.Vector;
@@ -32,7 +32,7 @@ class SphereTest {
         assertEquals(1, result.length(), 0.00000001, "Sphere's normal is not a unit vector");
     }
     /**
-     * Test method for {@link geometries.Sphere#findIntersections(primitives.Ray)}.
+     * Test method for {@link Intersectable#findIntersections(Ray)}.
      */
     @Test
     public void testFindIntersections() {

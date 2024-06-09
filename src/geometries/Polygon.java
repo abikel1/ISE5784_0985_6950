@@ -1,19 +1,22 @@
 package geometries;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static primitives.Util.isZero;
+import static primitives.Util.compareSign;
 
 import primitives.Point;
 import primitives.Ray;
 import primitives.Vector;
+
 
 /**
  * Polygon class represents two-dimensional polygon in 3D Cartesian coordinate
  * system
  * @author Dan
  */
-public class Polygon implements Geometry {
+public class Polygon extends Geometry {
     /** List of polygon's vertices */
     protected final List<Point> vertices;
     /** Associated plane in which the polygon lays */
@@ -132,5 +135,39 @@ public class Polygon implements Geometry {
             return this.plane.findIntersections(ray);
         }
         return null;
+    }
+    /**
+     * Computes the intersection points between a given ray and the polygon.
+     *
+     * @param ray the ray to find intersections with the polygon
+     * @return a list of intersection points between the ray and the polygon, or
+     *         null if there are no intersections
+     */
+    @Override
+    public List<GeoPoint> findGeoIntersectionsHelper(Ray ray) {
+
+        int len = vertices.size();
+        Point p0 = ray.head;
+        Vector v = ray.direction;
+        List<Vector> vectors = new ArrayList<>(len);
+
+        // all the vectors
+        for (Point vertex : vertices) {
+            vectors.add(vertex.subtract(p0));
+        }
+
+        int sign = 0;
+        for (int i = 0; i < len; i++) {
+            // calculate the normal using the formula in the course slides
+            Vector n = vectors.get(i).crossProduct(vectors.get((i + 1) % len)).normalize();
+            double dotProd = v.dotProduct(n);
+
+            if (i == 0)
+                sign = dotProd > 0 ? 1 : -1;
+
+            if (!compareSign(sign, dotProd) || isZero(dotProd))
+                return null;
+        }
+        return plane.findGeoIntersectionsHelper(ray);
     }
 }

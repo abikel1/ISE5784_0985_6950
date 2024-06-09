@@ -5,10 +5,8 @@ import primitives.Point;
 import primitives.Vector;
 
 import static org.junit.jupiter.api.Assertions.*;
-import geometries.Plane;
-import primitives.Point;
+
 import primitives.Ray;
-import primitives.Vector;
 
 /**
  * Unit tests for the Plane class.
@@ -60,7 +58,7 @@ class PlaneTest {
         assertEquals(new Vector(sqrt3, sqrt3, sqrt3), pln.getNormal(new Point(0, 0, 1)), "wrong normal to triangle");
     }
     /**
-     * Test method for {@link geometries.Plane#findIntersections(primitives.Ray)}.
+     * Test method for {@link Intersectable#findIntersections(Ray)}.
      */
     @Test
     public void testFindIntersections() {
