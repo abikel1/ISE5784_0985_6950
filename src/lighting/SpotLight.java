@@ -87,6 +87,5 @@ public class SpotLight extends PointLight{
         return narrowBeam != 1
                 ? super.getIntensity(point).scale(Math.pow(Math.max(0, direction.dotProduct(getL(point))), narrowBeam))
                 : super.getIntensity(point).scale(Math.max(0, direction.dotProduct(getL(point))));
-
     }
 }
