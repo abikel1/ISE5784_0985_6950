@@ -17,7 +17,7 @@ import scene.Scene;
  */
 public class LightsTests {
    /** First scene for some of tests */
-   private final Scene          scene1                  = new Scene("Test scene");
+   private final Scene         scene1                  = new Scene("Test scene");
    /** Second scene for some of tests */
    private final Scene          scene2                  = new Scene("Test scene")
       .setAmbientLight(new AmbientLight(new Color(WHITE), new Double3(0.15)));
