@@ -32,9 +32,9 @@ public class Cylinder extends Tube
      * @return a list of GeoPoint objects representing the intersection points, or
      *         null if there are no intersections
      */
-    @Override
-    public List<GeoPoint> findGeoIntersectionsHelper(Ray ray) {
-        // TODO: Implement the intersection calculation for a cylinder
-        return null;
-    }
+//    @Override
+//    public List<GeoPoint> findGeoIntersectionsHelper(Ray ray) {
+//        // TODO: Implement the intersection calculation for a cylinder
+//        return null;
+//    }
 }

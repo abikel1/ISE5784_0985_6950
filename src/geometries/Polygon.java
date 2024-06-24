@@ -8,6 +8,7 @@ import static primitives.Util.compareSign;
 
 import primitives.Point;
 import primitives.Ray;
+import primitives.Util;
 import primitives.Vector;
 
 
@@ -85,40 +86,26 @@ public class Polygon extends Geometry {
 
     @Override
     public Vector getNormal(Point point) { return plane.getNormal(); }
-
-
-    /**
-     * Computes the intersection points between a given ray and the polygon.
-     *
-     * @param ray the ray to find intersections with the polygon
-     * @return a list of intersection points between the ray and the polygon, or
-     *         null if there are no intersections
-     */
     @Override
-    public List<GeoPoint> findGeoIntersectionsHelper(Ray ray) {
-
-        int len = vertices.size();
-        Point p0 = ray.head;
-        Vector v = ray.direction;
-        List<Vector> vectors = new ArrayList<>(len);
-
-        // all the vectors
-        for (Point vertex : vertices) {
-            vectors.add(vertex.subtract(p0));
-        }
-
-        int sign = 0;
-        for (int i = 0; i < len; i++) {
-            // calculate the normal using the formula in the course slides
-            Vector n = vectors.get(i).crossProduct(vectors.get((i + 1) % len)).normalize();
-            double dotProd = v.dotProduct(n);
-
-            if (i == 0)
-                sign = dotProd > 0 ? 1 : -1;
-
-            if (!compareSign(sign, dotProd) || isZero(dotProd))
+    public List<GeoPoint> findGeoIntersectionsHelper(Ray ray, double maxDistance) {
+        List<GeoPoint> intersections = plane.findGeoIntersectionsHelper(ray, maxDistance);
+        if (intersections == null)
+            return null;
+        intersections = List.of(new GeoPoint(this,intersections.get(0).point));
+        Point rayP0 = ray.head;
+        Vector rayVec = ray.direction;
+        int n = vertices.size();
+        Vector[] edgeVectors = new Vector[n];
+        for (int i = 0; i < n; ++i)
+            edgeVectors[i] = vertices.get(i).subtract(rayP0);
+        double[] scalars = new double[n];
+        for (int i = 0; i < n - 1; ++i)
+            scalars[i] = rayVec.dotProduct(edgeVectors[i].crossProduct(edgeVectors[i + 1]));
+        scalars[n - 1] = rayVec.dotProduct(edgeVectors[n - 1].crossProduct(edgeVectors[0]));
+        for (int i = 0; i < n - 1; ++i)
+            if (Util.alignZero(scalars[i] * scalars[i + 1]) <= 0)
                 return null;
-        }
-        return plane.findGeoIntersectionsHelper(ray);
+        return intersections;
     }
+
 }

@@ -9,7 +9,7 @@ import geometries.Intersectable.GeoPoint;
 import static primitives.Util.alignZero;
 
 public class SimpleRayTracer extends RayTracerBase{
-
+    private static final double DELTA = 0.1;
     /**
      * Constructs with one param.
      *
@@ -40,23 +40,43 @@ public class SimpleRayTracer extends RayTracerBase{
      * @param ray the ray that intersects the point
      * @return the color at the given point, accounting for local effects
      */
-    private Color calcLocalEffects(GeoPoint gp, Ray ray) {
+    private Color calcLocalEffects(GeoPoint gp, Ray ray)
+    {
+        // אתחול צבע שחור כצבע הבסיס
         Color color = Color.BLACK;
+        // כיוון הקרן
         Vector vector = ray.direction;
+        // וקטור הנורמל בנקודת הפגיעה
         Vector normal = gp.geometry.getNormal(gp.point);
+        // חישוב המכפלה הנקודתית בין הנורמל לכיוון הקרן
         double nv = alignZero(normal.dotProduct(vector));
+        // אם המכפלה הנקודתית היא אפס, אין החזר אור ולכן מחזירים את הצבע השחור
         if (nv == 0)
             return color;
+        // קבלת החומר של הגיאומטריה בנקודת הפגיעה
         Material material = gp.geometry.getMaterial();
-        for (LightSource lightSource : scene.lights) {
+        // עבור כל מקור אור בסצנה
+        for (LightSource lightSource : scene.lights)
+        {
+            // וקטור האור מנקודת הפגיעה למקור האור
             Vector lightVector = lightSource.getL(gp.point);
+            // חישוב המכפלה הנקודתית בין הנורמל לוקטור האור
             double nl = alignZero(normal.dotProduct(lightVector));
-            if (nl * nv > 0) {
+            // אם המכפלות הנקודתיות בעלות אותו סימן, האור מגיע מכיוון מתאים
+            if (nl * nv > 0&& unshaded(gp,lightVector,normal,nl,lightSource)) {
+                // קבלת עוצמת האור בנקודת הפגיעה
                 Color lightIntensity = lightSource.getIntensity(gp.point);
-                color = color.add(lightIntensity.scale(calcDiffusive(material, nl)),
-                        lightIntensity.scale(calcSpecular(material, normal, lightVector, nl, vector)));
+                // הוספת הצבע הדיפוזי והספקולרי לצבע הכולל
+                color = color.add(
+                        // חישוב הצבע הדיפוזי (מפוזר)
+                        lightIntensity.scale(calcDiffusive(material, nl)),
+                        // חישוב הצבע הספקולרי (משתקף)
+                        lightIntensity.scale(calcSpecular(material, normal, lightVector, nl, vector))
+                );
             }
         }
+
+        // החזרת הצבע המחושב
         return color;
     }
     /**
@@ -70,10 +90,13 @@ public class SimpleRayTracer extends RayTracerBase{
      * @return the specular color at the given point
      */
     private Double3 calcSpecular(Material material, Vector normal, Vector lightVector, double nl, Vector vector) {
+        // חישוב וקטור ההשתקפות על פי הנוסחה: R = L - 2*(N.L)*N
         Vector reflectedVector = lightVector.subtract(normal.scale(2 * nl));
+        // חישוב המכפלה הנקודתית בין וקטור הקרן ההפוכה (המצלמה לנקודת הפגיעה) לוקטור ההשתקפות
         double max = Math.max(0, vector.scale(-1).dotProduct(reflectedVector));
+        // חישוב עוצמת ההשתקפות (צבע ספקולרי) על פי הנוסחה: ks * max^nShininess
+        // הקטן מבין max או 0 (שלא יהיה מספר שלילי) בחזקת nShininess
         return material.kS.scale(Math.pow(max, material.nShininess));
-
     }
 
     /**
@@ -84,16 +107,32 @@ public class SimpleRayTracer extends RayTracerBase{
      * @return the diffusive color at the given point
      */
     private Double3 calcDiffusive(Material material, double nl) {
+        // חישוב הרכיב הדיפוזי של האור
+        // הכפלת מקדם הדיפוזיה של החומר (kD) במכפלה הנקודתית המוחלטת בין הנורמל לוקטור האור (nl)
         return material.kD.scale(Math.abs(nl));
     }
 
     /**
      * Calculates the color of a point in the scene based on the ambient light present.
-     * @param point the point in the scene for which to calculate the color
+     * @param geoPoint the point in the scene for which to calculate the color
      * @return the color of the point based on the ambient light present
      */
-    private Color calcColor(GeoPoint point, Ray ray)
-    {
-        return point.geometry.getEmission().add(scene.ambientLight.getIntensity(), calcLocalEffects(point, ray));
+    private Color calcColor(GeoPoint geoPoint, Ray ray) {
+        return scene.ambientLight.getIntensity().add(geoPoint.geometry.getEmission()).add(calcLocalEffects(geoPoint,ray));
     }
+    /**
+     * function will check if point is unshaded
+     *
+     * @param gp geometry point to check
+     * @param l  light vector
+     * @param n  normal vector
+     * @return true if unshaded
+     */
+    private boolean unshaded(GeoPoint gp, Vector l, Vector n, double nl, LightSource light) {
+        Vector lightDir = l.scale(-1);
+        Ray lightRay = new Ray(gp.point.add(n.scale(nl < 0 ? DELTA : -DELTA)), lightDir);
+        return scene.geometries.findGeoIntersections(lightRay, light.getDistance(gp.point)) == null;
+    }
+
+
 }
