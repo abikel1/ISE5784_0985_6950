@@ -82,7 +82,7 @@ public abstract class Intersectable
     }
 
     /**
-     * Finds the geographic intersections of the given ray up to the specified maximum distance.
+     * Finds the geographicc intersections of the given ray up to the specified maximum distance.
      *
      * @param ray The ray for which to find intersections.
      * @param maxDistance The maximum distance to consider for intersections.
