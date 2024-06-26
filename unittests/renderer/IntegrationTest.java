@@ -99,7 +99,7 @@ public class IntegrationTest
     }
 
     /**
-     * Tests ray intersections with triangles.
+     * Tests ray intersections with triangles
      */
     @Test
     void testTriangle() {
