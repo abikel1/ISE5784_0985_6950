@@ -3,7 +3,9 @@ package primitives;
 import java.util.List;
 
 import static primitives.Util.isZero;
+
 import geometries.Intersectable.GeoPoint;
+import lighting.LightSource;
 
 /**
  * This class represents a ray in three-dimensional space.
@@ -14,6 +16,8 @@ public class Ray
     final public Point head;
     // The direction of the ray
     final public Vector direction;
+    private static final double DELTA = 0.1;
+
 
     /**
      * Constructs a new Ray object with the given starting point and direction.
@@ -33,6 +37,22 @@ public class Ray
                 && this.direction.equals(other.direction);
     }
 
+    /**
+     * Constructs a new ray with a start point, direction, and normal vector.
+     *
+     * @param point     The start point of the ray.
+     * @param direction The direction vector of the ray.
+     * @param normal    The normal vector used to move the start point.
+     */
+    public Ray(Point point, Vector direction, Vector normal)
+    {
+        // point + normal.scale(±DELTA)
+        this.direction = direction.normalize();
+
+        double nv = normal.dotProduct(direction);
+
+        Vector normalDelta = normal.scale((nv > 0 ? DELTA : -DELTA));
+        head = point.add(normalDelta);}
     @Override
     public String toString() {
         return "Ray:" + head.toString()+" "+direction.toString();
