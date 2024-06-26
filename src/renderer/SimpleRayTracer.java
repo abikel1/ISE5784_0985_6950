@@ -11,7 +11,7 @@ import static primitives.Util.alignZero;
 public class SimpleRayTracer extends RayTracerBase{
 
     /**
-     * Constructs with one param.
+     * Constructs with one pa
      *
      * @param scene the scene to be traced
      */
