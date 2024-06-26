@@ -11,7 +11,7 @@ public abstract class Intersectable
      */
     public static class GeoPoint {
         /**
-         * The geometry information of the point.
+         * The geometry information of the point
          */
         public Geometry geometry;
 
