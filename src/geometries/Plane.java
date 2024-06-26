@@ -2,7 +2,6 @@ package geometries;
 
 import primitives.Point;
 import primitives.Ray;
-import primitives.Util;
 import primitives.Vector;
 
 import java.util.List;
@@ -65,16 +64,31 @@ public class Plane extends Geometry
     {
         return normal;
     }
-    @Override
-    public List<GeoPoint> findGeoIntersectionsHelper(Ray ray, double maxDistance) {
-        Point rayP0 = ray.head;
-        if (rayP0.equals(point))
-            return null;
-        double denom = normal.dotProduct(ray.direction);
-        if (Util.isZero(denom))
-            return null;
-        double t = Util.alignZero(normal.dotProduct(point.subtract(rayP0)) / denom);
-        return t <= 0 || Util.alignZero(t - maxDistance) >= 0 ? null : List.of(new GeoPoint(this, ray.getPoint(t)));
-    }
 
+    /**
+     * Computes the intersection points of a given {@link Ray} with the plane. If
+     * the ray doesn't intersect the plane, the method returns null.
+     *
+     * @param ray the ray to intersect with the plane
+     * @return a list of intersection points if the ray intersects the plane, null
+     *         otherwise
+     */
+    @Override
+    public List<GeoPoint> findGeoIntersectionsHelper(Ray ray) {
+        // Calculate the dot product of the plane's normal vector with the ray's
+        // direction vector
+        double nv = normal.dotProduct(ray.direction);
+        if (isZero(nv)) { // if the dot product is zero, the ray is parallel to the plane and doesn't
+            // intersect
+            return null;
+        }
+        try {
+            // Calculate the parameter t at which the ray intersects the plane
+            Vector pSubtractP0 = point.subtract(ray.head);
+            double t = alignZero((normal.dotProduct(pSubtractP0)) / nv);
+            return t <= 0 ? null : List.of(new GeoPoint(this, ray.getPoint(t)));
+        } catch (Exception ex) { // if an exception occurs during the calculation, return null
+            return null;
+        }
+    }
 }

@@ -208,17 +208,12 @@ public class LightsTests {
               .setRayTracer(new SimpleRayTracer(scene1))
               .build();
 
-      // הוספת הספירה לסצנה
       scene1.geometries.add(sphere);
-      // הוספת תאורה כיוונית בצבע אדום
       scene1.lights.add(new DirectionalLight(new Color(400, 0, 0), new Vector(-1, 1, -1)));
-      // הוספת תאורה נקודתית בצבע צהוב
       scene1.lights.add(new PointLight(new Color(500, 500, 0), new Point(0, 30, 10)).setKl(0.0000003).setKq(0.0000001));
-      // הוספת תאורה ספוט בצבע ירוק
       scene1.lights.add(new SpotLight(new Color(0, 900, 0), new Point(-100, -70, 50), new Vector(1, -1, -2))
               .setKl(0.0000000001).setKq(0.000000001));
 
-      // יצירת התמונה ושמירתה
       camera1.renderImage().writeToImage();
    }
 
@@ -236,18 +231,13 @@ public class LightsTests {
               .setRayTracer(new SimpleRayTracer(scene2))
               .build();
 
-      // הוספת המשולשים לסצנה והגדרת החומרים שלהם
       scene2.geometries.add(triangle1.setMaterial(new Material().setKd(0.5).setKs(0.5).setShininess(300)),
               triangle2.setMaterial(new Material().setKd(0.5).setKs(0.5).setShininess(300)));
-      // הוספת תאורה כיוונית בצבע ירוק
       scene2.lights.add(new DirectionalLight(new Color(0, 255, 0), trianglesLightDirection));
-      // הוספת תאורה נקודתית בצבע אדום
       scene2.lights.add(new PointLight(new Color(255, 0, 0), new Point(40, -70, -100)).setKl(0.0005).setKq(0.0005));
-      // הוספת תאורה ספוט בצבע כחול
       scene2.lights.add(new SpotLight(new Color(0, 0, 255), new Point(12, 0, 0), new Vector(0, -2, -1))
               .setKl(0.0001).setKq(0.000005));
 
-      // יצירת התמונה ושמירתה
       camera2.renderImage().writeToImage();
    }
 

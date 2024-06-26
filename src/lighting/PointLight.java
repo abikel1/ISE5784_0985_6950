@@ -80,8 +80,4 @@ public class PointLight extends Light implements LightSource{
         }
         return p.subtract(position).normalize();//return the normalized vector of (p-position)
     }
-    @Override
-    public double getDistance(Point point) {
-        return point.distance(position);
-    }
 }

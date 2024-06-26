@@ -11,7 +11,7 @@ import java.util.List;
 public class Scene {
     // scene is PDS so the fields would be public:
     public String name; // The name of the scene
-    public Color background=Color.BLACK; // The background color of the scene (initialized to black)
+    public Color background = Color.BLACK; // The background color of the scene (initialized to black)
     public AmbientLight ambientLight = AmbientLight.NONE; // The ambient light for the scene (initialized to NONE)
     public Geometries geometries = new Geometries(); // The 3D model (initialized to an empty model)
     public List<LightSource> lights = new LinkedList<>();
