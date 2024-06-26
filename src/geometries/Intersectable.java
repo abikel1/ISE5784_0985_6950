@@ -82,7 +82,7 @@ public abstract class Intersectable
     }
 
     /**
-     * Finds the intersection points of the ray with the surface of the object. This
+     * Finds the intersection points of the ray with the surface of the object
      * method should be implemented by the subclasses to provide their own
      * intersection logic.
      *
