@@ -11,7 +11,7 @@ import primitives.*;
 import scene.Scene;
 
 /** Testing basic shadows
- * @author Dan */
+ * @author AYALA AND AVITAL */
 public class ShadowTests {
    /** Scene of the tests */
    private final Scene          scene      = new Scene("Test scene");
