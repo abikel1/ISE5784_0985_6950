@@ -14,6 +14,7 @@ public class Ray
     final public Point head;
     // The direction of the ray
     final public Vector direction;
+    private static final double DELTA = 0.1;
 
     /**
      * Constructs a new Ray object with the given starting point and direction.
@@ -83,5 +84,17 @@ public class Ray
             }
         }
         return closest;
+    }
+    /**
+     * Constructs a ray with a given starting point, direction, and surface normal.
+     *
+     * @param p The starting point of the ray.
+     * @param dir The direction of the ray (must be already normalized)
+     * @param normal The surface normal at the starting point.
+     */
+    public Ray(Point p, Vector dir, Vector normal) {
+        Vector delta = normal.scale(normal.dotProduct(dir) > 0 ? DELTA : -DELTA);
+        this.head = p.add(delta);
+        this.direction = dir;
     }
 }
