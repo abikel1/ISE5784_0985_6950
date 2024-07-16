@@ -2,6 +2,8 @@ package renderer;
 
 import primitives.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.MissingResourceException;
 
 import static primitives.Util.isZero;
@@ -17,7 +19,29 @@ public class Camera implements Cloneable{
     private Point viewPlanePC;
     private ImageWriter imageWriter;
     private RayTracerBase rayTracer;
+    private final String RESOURCE = "Renderer resource not set";
+    private final String CAMERA_CLASS = "Camera";
+    private final String IMAGE_WRITER = "Image writer";
+    private final String CAMERA = "Camera";
+    private final String RAY_TRACER = "Ray tracer";
+    private final String DISTANCE = "camera cant be in distance 0";
+    /**
+     * turn on - off antialising super sampling
+     */
+    private boolean isAntialising= false;//indicates of to improve the picture with antialising or not. the default is not.
+    /**
+     * the number of rays
+     */
+    private int numOfRaysSuperSampeling = 100;//for sumersampleing
+    public Camera setnumOfRaysSuperSampeling(int numOfRays) {
+        this.numOfRaysSuperSampeling = numOfRays;
+        return this;
+    }
 
+    public Camera setAntialising(boolean isAntialising) {
+        this.isAntialising = isAntialising;
+        return this;
+    }
     private Camera(){}
 
 
@@ -245,17 +269,40 @@ public class Camera implements Cloneable{
         if (rayTracer == null)
             throw new UnsupportedOperationException("Camera resource not set");
 
-        int nX = imageWriter.getNx();
-        int nY = imageWriter.getNy();
+        if (isAntialising) {
+            renderImageBeam();
+        } else {
+            int nX = imageWriter.getNx();
+            int nY = imageWriter.getNy();
 
-        for (int j = 0; j < nX; j++) {
-            for (int i = 0; i < nY; i++) {
-                Color color = castRay(j, i, nX, nY);
-                this.imageWriter.writePixel(j, i, color);
+            for (int j = 0; j < nX; j++) {
+                for (int i = 0; i < nY; i++) {
+                    Color color = castRay(j, i, nX, nY);
+                    this.imageWriter.writePixel(j, i, color);
+                }
             }
         }
         return this;
     }
+
+//    public Camera renderImage() throws UnsupportedOperationException {
+//        if (imageWriter == null)
+//            throw new UnsupportedOperationException("Camera resource not set");
+//
+//        if (rayTracer == null)
+//            throw new UnsupportedOperationException("Camera resource not set");
+//
+//        int nX = imageWriter.getNx();
+//        int nY = imageWriter.getNy();
+//
+//        for (int j = 0; j < nX; j++) {
+//            for (int i = 0; i < nY; i++) {
+//                Color color = castRay(j, i, nX, nY);
+//                this.imageWriter.writePixel(j, i, color);
+//            }
+//        }
+//        return this;
+//    }
     /**
      * Casts a ray through the given pixel (i,j) on the view plane and returns the
      * color that results from tracing the ray.
@@ -288,12 +335,88 @@ public class Camera implements Cloneable{
                     imageWriter.writePixel(j,i,color);
         return this;
     }
-    public Camera writeToImage() {
+    public Camera writeToImage()
+    {
         if (imageWriter == null) {
             throw new MissingResourceException("ImageWriter field cannot be null", Camera.class.getName(), "");
         }
         // delegates the appropriate method of the ImageWriter.
         imageWriter.writeToImage();
         return this;
+    }
+    private void renderImageBeam()
+    {//track rays, if its a beam and more
+
+        if (imageWriter == null)
+            throw new MissingResourceException(RESOURCE, CAMERA_CLASS, IMAGE_WRITER);
+        if (rayTracer == null)
+            throw new MissingResourceException(RESOURCE, CAMERA_CLASS, RAY_TRACER);
+
+        if(numOfRaysSuperSampeling==0||numOfRaysSuperSampeling==1)//no supersampeling
+            renderImage();//calls for creating the picture
+
+        //else,supersampleing
+        //runs on all the image
+        for(int i=0;i<imageWriter.getNx();i++)
+        {
+            for(int j=0;j<imageWriter.getNy();j++)
+            {
+                //creating a list of all the rays in the beam, calculating their color and eriting the image
+
+                List<Ray> rays = constructBeamThroughPixel(imageWriter.getNx(), imageWriter.getNy(), j, i,numOfRaysSuperSampeling);
+                Color rayColor = rayTracer.traceRay(rays);//new func,gets a list of rays
+                imageWriter.writePixel(j, i, rayColor);
+            }
+        }
+    }
+    public List<Ray> constructBeamThroughPixel(int nX, int nY, int j, int i, int raysAmountSuper)
+    {
+        if(isZero(distance))
+            throw new IllegalArgumentException(DISTANCE);
+        int numOfRays = (int)Math.floor(Math.sqrt(raysAmountSuper)); //num of rays in each row or column
+
+        if (numOfRays==1) //if the beam is only one ray
+            return List.of(constructRay(nX, nY, j, i));//return a list of only one ray
+
+        double Ry= height/nY;
+        double Rx=width/nX;
+        double Yi=(i-(nY-1)/2d)*Ry;
+        double Xj=(j-(nX-1)/2d)*Rx;
+
+        double PRy = Ry / numOfRays; //height distance between each ray
+        double PRx = Rx / numOfRays; //width distance between each ray
+
+        List<Ray> beamRays = new ArrayList<>();
+
+        for (int row = 0; row < numOfRays; ++row) {//runs on the pixel grid
+            for (int column = 0; column < numOfRays; ++column) {
+                beamRays.add(constructRaysThroughPixel(PRy,PRx,Yi, Xj, row, column));//add the ray that was shot from target area
+            }
+        }
+        beamRays.add(constructRay(nX, nY, j, i));//add the center screen ray
+        return beamRays;
+    }
+
+
+    private Ray constructRaysThroughPixel(double Ry,double Rx, double yi, double xj, int j, int i)
+    {//creating a ray of beam rays
+        Point Pc = p0.add(vTo.scale(distance)); //the center of the screen point
+
+        double y_sample_i =  (i *Ry + Ry/2d); //The pixel starting point on the y axis
+        double x_sample_j=   (j *Rx + Rx/2d); //The pixel starting point on the x axis
+
+        Point Pij = Pc; //The center point at the pixel through which a beam is fired
+        //Moving the point through which a beam is fired on the x axis
+        if (!isZero(x_sample_j + xj))
+        {
+            Pij = Pij.add(vRight.scale(x_sample_j + xj));
+        }
+        //Moving the point through which a beam is fired on the y axis
+        if (!isZero(y_sample_i + yi))
+        {
+            Pij = Pij.add(vUp.scale(-y_sample_i -yi ));
+        }
+        Vector Vij = Pij.subtract(p0);
+        return new Ray(p0,Vij);//create the ray throw the point we calculate here
     }
 }

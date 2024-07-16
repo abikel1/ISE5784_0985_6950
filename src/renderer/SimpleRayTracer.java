@@ -294,5 +294,23 @@ public class SimpleRayTracer extends RayTracerBase{
 
         return ktr; // Return the final transparency factor
     }
+    /**
+     * @param rays List of surrounding rays(the beam)
+     * @return average color
+     */
+    public Color traceRay(List<Ray> rays)
+    {
+        if(rays == null)
+            return scene.background;
+        Color color = scene.background;
+        for (Ray ray : rays) //runs on all the rays in the beam
+        {
+            color = color.add(traceRay(ray));//add the color of each ray
+        }
+        color = color.add(scene.ambientLight.getIntensity());
+        int size = rays.size();
+        return color.reduce(size);//return the average color of all the rays
+
+    }
 
 }
