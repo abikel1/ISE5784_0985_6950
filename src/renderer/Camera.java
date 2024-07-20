@@ -269,9 +269,11 @@ public class Camera implements Cloneable{
         if (rayTracer == null)
             throw new UnsupportedOperationException("Camera resource not set");
 
-        if (isAntialising) {
+        if (isAntialising&&(numOfRaysSuperSampeling>1))
+        {
             renderImageBeam();
-        } else {
+        }
+        else {
             int nX = imageWriter.getNx();
             int nY = imageWriter.getNy();
 
@@ -352,8 +354,6 @@ public class Camera implements Cloneable{
         if (rayTracer == null)
             throw new MissingResourceException(RESOURCE, CAMERA_CLASS, RAY_TRACER);
 
-        if(numOfRaysSuperSampeling==0||numOfRaysSuperSampeling==1)//no supersampeling
-            renderImage();//calls for creating the picture
 
         //else,supersampleing
         //runs on all the image
@@ -363,13 +363,13 @@ public class Camera implements Cloneable{
             {
                 //creating a list of all the rays in the beam, calculating their color and eriting the image
 
-                List<Ray> rays = constructBeamThroughPixel(imageWriter.getNx(), imageWriter.getNy(), j, i,numOfRaysSuperSampeling);
+                List<Ray> rays = constructBeamForEacjPixel(imageWriter.getNx(), imageWriter.getNy(), j, i,numOfRaysSuperSampeling);
                 Color rayColor = rayTracer.traceRay(rays);//new func,gets a list of rays
                 imageWriter.writePixel(j, i, rayColor);
             }
         }
     }
-    public List<Ray> constructBeamThroughPixel(int nX, int nY, int j, int i, int raysAmountSuper)
+    public List<Ray> constructBeamForEacjPixel(int nX, int nY, int j, int i, int raysAmountSuper)
     {
         if(isZero(distance))
             throw new IllegalArgumentException(DISTANCE);
@@ -390,7 +390,7 @@ public class Camera implements Cloneable{
 
         for (int row = 0; row < numOfRays; ++row) {//runs on the pixel grid
             for (int column = 0; column < numOfRays; ++column) {
-                beamRays.add(constructRaysThroughPixel(PRy,PRx,Yi, Xj, row, column));//add the ray that was shot from target area
+                beamRays.add(constructRaysForEachPixel(PRy,PRx,Yi, Xj, row, column));//add the ray that was shot from target area
             }
         }
         beamRays.add(constructRay(nX, nY, j, i));//add the center screen ray
@@ -398,23 +398,23 @@ public class Camera implements Cloneable{
     }
 
 
-    private Ray constructRaysThroughPixel(double Ry,double Rx, double yi, double xj, int j, int i)
+    private Ray constructRaysForEachPixel(double Ry,double Rx, double yi, double xj, int j, int i)
     {//creating a ray of beam rays
         Point Pc = p0.add(vTo.scale(distance)); //the center of the screen point
 
-        double y_sample_i =  (i *Ry + Ry/2d); //The pixel starting point on the y axis
-        double x_sample_j=   (j *Rx + Rx/2d); //The pixel starting point on the x axis
+        double yStartingi =  (i *Ry + Ry/2d); //The pixel starting point on the y axis
+        double xStartingj=   (j *Rx + Rx/2d); //The pixel starting point on the x axis
 
         Point Pij = Pc; //The center point at the pixel through which a beam is fired
         //Moving the point through which a beam is fired on the x axis
-        if (!isZero(x_sample_j + xj))
+        if (!isZero(xStartingj + xj))
         {
-            Pij = Pij.add(vRight.scale(x_sample_j + xj));
+            Pij = Pij.add(vRight.scale(xStartingj + xj));
         }
         //Moving the point through which a beam is fired on the y axis
-        if (!isZero(y_sample_i + yi))
+        if (!isZero(yStartingi + yi))
         {
-            Pij = Pij.add(vUp.scale(-y_sample_i -yi ));
+            Pij = Pij.add(vUp.scale(-yStartingi -yi ));
         }
         Vector Vij = Pij.subtract(p0);
         return new Ray(p0,Vij);//create the ray throw the point we calculate here

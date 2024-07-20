@@ -224,7 +224,7 @@ public class ReflectionRefractionTests {
 
                 // blush
                 new Sphere(new Point(25, 15, -100), 8) // the right sphere- blush
-                       i .setEmission(new Color(255, 0, 128))
+                        .setEmission(new Color(255, 0, 128))
                         .setMaterial(new Material().setKd(0.6).setKs(0.9).setShininess(1000).setkT(0.1).setkR(0)),
                 new Sphere(new Point(-25, 15, -100), 8) // the left sphere- blush
                         .setEmission(new Color(255, 0, 128))
