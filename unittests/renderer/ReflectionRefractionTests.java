@@ -204,7 +204,7 @@ public class ReflectionRefractionTests {
                 .setImageWriter(new ImageWriter("TeddyBearAntiAliasing", 500, 500))
                 .setRayTracer(new SimpleRayTracer(scene))
                 .build();
-                camera.setAntialising(true).setnumOfRaysSuperSampeling(40);
+                camera.setAntialising(true).setnumOfRaysSuperSampeling(100);
 
         scene.geometries.add(
                 // ears
@@ -292,4 +292,102 @@ public class ReflectionRefractionTests {
         camera.renderImage().writeToImage();
     }
 
+
+    @Test
+    public void TeddyBearAntiAliasingAdaptive() {
+        Camera camera = Camera.getBuilder()
+                .setLocation(new Point(0, 0, 1700))
+                .setDirection(new Vector(0, 0, -1), new Vector(0, 1, 0))
+                .setVpSize(150, 150)
+                .setVpDistance(1000)
+                .setImageWriter(new ImageWriter("TeddyBearAntiAliasingAdaptive", 500, 500))
+                .setRayTracer(new SimpleRayTracer(scene))
+                .build();
+        camera.setAntialising(true).setAdaptiveSuperSamplingFlag(true).setMultithreading(4).setNumOfRays(1024);
+
+        scene.geometries.add(
+                // ears
+                new Sphere(new Point(-50, 75, -100), 20) // the center sphere- left ear
+                        .setEmission(new Color(153, 102, 0))
+                        .setMaterial(new Material().setKd(0.6).setKs(0.9).setShininess(1000).setkT(0.15).setkR(0)),
+                new Sphere(new Point(50, 75, -100), 20) // the center sphere-right ear
+                        .setEmission(new Color(153, 102, 0))
+                        .setMaterial(new Material().setKd(0.6).setKs(0.9).setShininess(1000).setkT(0.15).setkR(0)),
+
+                new Sphere(new Point(-48, 73, -100), 15) // the center sphere- left ear inner
+                        .setEmission(new Color(255, 0, 128))
+                        .setMaterial(new Material().setKd(0.6).setKs(0.9).setShininess(1000).setkT(0.3).setkR(0)),
+                new Sphere(new Point(48, 73, -100), 15) // the center sphere-right ear inner
+                        .setEmission(new Color(255, 0, 128))
+                        .setMaterial(new Material().setKd(0.6).setKs(0.9).setShininess(1000).setkT(0.3).setkR(0)),
+
+                // blush
+                new Sphere(new Point(25, 15, -100), 8) // the right sphere- blush
+                        .setEmission(new Color(255, 0, 128))
+                        .setMaterial(new Material().setKd(0.6).setKs(0.9).setShininess(1000).setkT(0.1).setkR(0)),
+                new Sphere(new Point(-25, 15, -100), 8) // the left sphere- blush
+                        .setEmission(new Color(255, 0, 128))
+                        .setMaterial(new Material().setKd(0.6).setKs(0.9).setShininess(1000).setkT(0.2).setkR(0)),
+
+                // eyes
+                new Sphere(new Point(18, 22, -45), 7) // right eye
+                        .setEmission(new Color(69, 43, 29)),
+                new Sphere(new Point(-18, 22, -45), 7) // left eye
+                        .setEmission(new Color(69, 43, 29)),
+                new Triangle(new Point(-5, 14, 95), new Point(5, 14, 115), new Point(0, 10, 130))
+                        .setEmission(new Color(69, 43, 29))
+                        .setMaterial(new Material().setKd(0.5).setKs(0.5).setShininess(30)), // triangle of nose
+
+                // head
+                new Sphere(new Point(0, 40, -100), 60) // the center sphere-head
+                        .setEmission(new Color(153, 102, 0))
+                        .setMaterial(new Material().setKd(0.6).setKs(0.9).setShininess(1000).setkT(0.15).setkR(0)),
+
+                // body
+                new Sphere(new Point(0, -40, -120), 50) // the center body
+                        .setEmission(new Color(153, 102, 0))
+                        .setMaterial(new Material().setKd(0.6).setKs(0.9).setShininess(1000).setkT(0.15).setkR(0)),
+
+                // hands
+                new Sphere(new Point(-47, -17, -100), 13) // the center sphere- left hand
+                        .setEmission(new Color(153, 102, 0))
+                        .setMaterial(new Material().setKd(0.6).setKs(0.9).setShininess(1000).setkT(0.15).setkR(0)),
+                new Sphere(new Point(47, -17, -100), 13) // the center sphere-right hand
+                        .setEmission(new Color(153, 102, 0))
+                        .setMaterial(new Material().setKd(0.6).setKs(0.9).setShininess(1000).setkT(0.15).setkR(0)),
+
+                // legs
+                new Sphere(new Point(-40, -70, -100), 20) // the center sphere- left leg
+                        .setEmission(new Color(153, 102, 0))
+                        .setMaterial(new Material().setKd(0.6).setKs(0.9).setShininess(1000).setkT(0.15).setkR(0)),
+                new Sphere(new Point(40, -70, -100), 20) // the center sphere-right leg
+                        .setEmission(new Color(153, 102, 0))
+                        .setMaterial(new Material().setKd(0.6).setKs(0.9).setShininess(1000).setkT(0.15).setkR(0)),
+
+                // balloons
+                new Sphere(new Point(-95, 70, -120), 36) // the center sphere- balloon
+                        .setEmission(new Color(255, 0, 0)) //
+                        .setMaterial(new Material().setKd(0).setKs(0.2).setShininess(1000).setkT(0.6).setkR(0.2)),
+                new Sphere(new Point(-95, 70, -120), 20) // the center sphere- balloon
+                        .setEmission(new Color(0, 100, 100))
+                        .setMaterial(new Material().setKd(0.6).setKs(0.9).setShininess(1000).setkT(0).setkR(1)),
+                new Triangle(new Point(-70, 42, 95), new Point(-67, 42, 115), new Point(-40, -17, 130))
+                        .setEmission(new Color(java.awt.Color.BLACK))
+                        .setMaterial(new Material().setKd(0.5).setKs(0.5).setShininess(30))); // line of balloons
+
+//                // floor
+//                new Triangle(new Point(-150, -150, -115), new Point(150, -150, -115), new Point(150, 0, -150)) // floor
+//                        .setEmission(new Color(167, 199, 231)).setMaterial(new Material().setkT(0.2)),
+//                new Triangle(new Point(-150, -150, -115), new Point(-150, -5, -150), new Point(150, 0, -150)) // floor
+//                        .setEmission(new Color(167, 199, 231)).setMaterial(new Material().setkT(0.2)));
+
+        scene.lights.add( // add spot light
+                new SpotLight(new Color(1000, 600, 400), new Point(-250, 400, 1500), new Vector(-40, -1, -2))
+                        .setKl(0.0004).setKq(0.0000006));
+        scene.lights.add(new DirectionalLight(new Color(50, 100, 0), new Vector(-50, -1, -1))); // add directional light
+
+        scene.setBackground(new Color(167, 199, 231));
+
+        camera.renderImage().writeToImage();
+    }
 }

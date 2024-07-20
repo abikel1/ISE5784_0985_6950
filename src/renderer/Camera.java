@@ -3,6 +3,7 @@ package renderer;
 import primitives.*;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.MissingResourceException;
 
@@ -33,6 +34,39 @@ public class Camera implements Cloneable{
      * the number of rays
      */
     private int numOfRaysSuperSampeling = 100;//for sumersampleing
+
+    private boolean adaptiveSuperSamplingFlag = false;
+    private int numOfRays = 1;
+    private int threads = 1;
+    private static final int SPARE_THREADS = 2;
+    private boolean print = false;
+
+
+    public Camera setNumOfRays(int numOfRays) {
+        this.numOfRays = Math.max(1, numOfRays);
+        return this;
+    }
+
+    public Camera setNumOfRaysSuperSampeling(int numOfRaysSuperSampeling) {
+        this.numOfRaysSuperSampeling = numOfRaysSuperSampeling;
+        return this;
+    }
+
+    public Camera setAdaptiveSuperSamplingFlag(boolean adaptiveSuperSamplingFlag) {
+        this.adaptiveSuperSamplingFlag = adaptiveSuperSamplingFlag;
+        return this;
+    }
+
+    public Camera setThreads(int threads) {
+        this.threads = threads;
+        return this;
+    }
+
+    public Camera setPrint(boolean print) {
+        this.print = print;
+        return this;
+    }
+
     public Camera setnumOfRaysSuperSampeling(int numOfRays) {
         this.numOfRaysSuperSampeling = numOfRays;
         return this;
@@ -42,6 +76,73 @@ public class Camera implements Cloneable{
         this.isAntialising = isAntialising;
         return this;
     }
+
+    private class Pixel {
+        private long maxMunRows;
+        private long maxMunCols;
+        private long pixels;
+        public volatile int row = 0;
+        public volatile int col = -1;
+        private long counter = 0;
+        private int percent = 0;
+        private long nextCounter = 0;
+
+        public Pixel(int row, int col) {
+            this.maxMunRows = row;
+            this.maxMunCols = col;
+            this.pixels = maxMunCols * maxMunRows;
+            this.nextCounter = pixels / 100;
+            if (print) {
+                System.out.printf("\r %02d%%", percent);
+            }
+        }
+
+        public Pixel() {}
+
+        public boolean nextPixel(Pixel p) {
+            int percent = nextp(p);
+            if (percent > 0 && print) {
+                synchronized (System.out) {
+                    System.out.printf("\r %02d%%", percent);
+                }
+            }
+            if (percent >= 0) return true;
+            if (print) {
+                synchronized (System.out) {
+                    System.out.printf("\r %02d%%", 100);
+                }
+            }
+            return false;
+        }
+
+        private synchronized int nextp(Pixel target) {
+            col++;
+            counter++;
+            if (col < maxMunCols) {
+                target.row = this.row;
+                target.col = this.col;
+                if (counter == nextCounter) {
+                    percent++;
+                    nextCounter = pixels * (percent + 1) / 100;
+                    return percent;
+                }
+                return 0;
+            }
+            row++;
+            if (row < maxMunRows) {
+                col = 0;
+                if (counter == nextCounter) {
+                    percent++;
+                    nextCounter = pixels * (percent + 1) / 100;
+                    return percent;
+                }
+                return 0;
+            }
+            return -1;
+        }
+    }
+
+
     private Camera(){}
 
 
@@ -262,49 +363,126 @@ public class Camera implements Cloneable{
      * writer. Throws a MissingResourceException if either the image writer or the
      * ray tracer base are not set.
      */
-    public Camera renderImage() throws UnsupportedOperationException {
-        if (imageWriter == null)
-            throw new UnsupportedOperationException("Camera resource not set");
-
-        if (rayTracer == null)
-            throw new UnsupportedOperationException("Camera resource not set");
-
-        if (isAntialising&&(numOfRaysSuperSampeling>1))
-        {
-            renderImageBeam();
-        }
-        else {
-            int nX = imageWriter.getNx();
-            int nY = imageWriter.getNy();
-
-            for (int j = 0; j < nX; j++) {
-                for (int i = 0; i < nY; i++) {
-                    Color color = castRay(j, i, nX, nY);
-                    this.imageWriter.writePixel(j, i, color);
-                }
+    public Camera renderImage() {
+        try {
+            if (adaptiveSuperSamplingFlag) {
+                renderImageAdaptive();
+            } else {
+                renderImageBeam();
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return this;
     }
 
-//    public Camera renderImage() throws UnsupportedOperationException {
-//        if (imageWriter == null)
-//            throw new UnsupportedOperationException("Camera resource not set");
-//
-//        if (rayTracer == null)
-//            throw new UnsupportedOperationException("Camera resource not set");
-//
-//        int nX = imageWriter.getNx();
-//        int nY = imageWriter.getNy();
-//
-//        for (int j = 0; j < nX; j++) {
-//            for (int i = 0; i < nY; i++) {
-//                Color color = castRay(j, i, nX, nY);
-//                this.imageWriter.writePixel(j, i, color);
-//            }
-//        }
-//        return this;
-//    }
+
+    private void renderImageAdaptive() throws InterruptedException {
+        int nX = imageWriter.getNx();
+        int nY = imageWriter.getNy();
+
+        final Pixel thePixel = new Pixel(nY, nX);
+        Thread[] threads = new Thread[this.threads];
+        for (int i = 0; i < this.threads; i++) {
+            threads[i] = new Thread(() -> {
+                Pixel pixel = new Pixel();
+                while (thePixel.nextPixel(pixel)) {
+                    try {
+                        primitives.Color color = adaptiveSuperSampling(nX, nY, pixel.col, pixel.row, numOfRaysSuperSampeling);
+                        imageWriter.writePixel(pixel.col, pixel.row, new Color(color.getColor()));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
+
+        for (Thread thread : threads) thread.start();
+        for (Thread thread : threads) thread.join();
+        if (print) System.out.print("\r100%\n");
+    }
+
+    private primitives.Color adaptiveSuperSampling(int nX, int nY, int j, int i, int numOfRays) throws Exception {
+        int numOfRaysInRowCol = (int) Math.floor(Math.sqrt(numOfRays));
+        if (numOfRaysInRowCol == 1) {
+            return rayTracer.traceRay(constructRay(nX, nY, j, i));
+        }
+
+        Point Pc = p0.add(vTo.scale(distance));
+        double Ry = height / nY;
+        double Rx = width / nX;
+        double Yi = (i - (nY / 2d)) * Ry + Ry / 2d;
+        double Xj = (j - (nX / 2d)) * Rx + Rx / 2d;
+        Point Pij = Pc.add(vRight.scale(-Xj)).add(vUp.scale(-Yi));
+
+        double PRy = Ry / numOfRaysInRowCol;
+        double PRx = Rx / numOfRaysInRowCol;
+        return adaptiveSuperSamplingRec(Pij, Rx, Ry, PRx, PRy, null);
+    }
+
+    private primitives.Color adaptiveSuperSamplingRec(Point centerP, double width, double height, double minWidth, double minHeight, List<Point> prePoints) throws Exception {
+        if (width < minWidth * 2 || height < minHeight * 2) {
+            return rayTracer.traceRay(new Ray(p0,centerP.subtract(p0)));
+        }
+
+        List<Point> nextCenterPList = new LinkedList<>();
+        List<Point> cornersList = new LinkedList<>();
+        List<primitives.Color> colorList = new LinkedList<>();
+
+        for (int i = -1; i <= 1; i += 2) {
+            for (int j = -1; j <= 1; j += 2) {
+                Point tempCorner = centerP.add(vRight.scale(i * width / 2)).add(vUp.scale(j * height / 2));
+                cornersList.add(tempCorner);
+                if (prePoints == null || !isInList(prePoints, tempCorner)) {
+                    Ray tempRay = new Ray(p0,tempCorner.subtract(p0));
+                    nextCenterPList.add(centerP.add(vRight.scale(i * width / 4)).add(vUp.scale(j * height / 4)));
+                    colorList.add(rayTracer.traceRay(tempRay));
+                }
+            }
+        }
+
+        if (nextCenterPList == null || nextCenterPList.size() == 0) {
+            return primitives.Color.BLACK;
+        }
+
+        boolean isAllEquals = true;
+        primitives.Color tempColor = colorList.get(0);
+        for (primitives.Color color : colorList) {
+            if (!tempColor.isAlmostEquals(color)) {
+                isAllEquals = false;
+                break;
+            }
+        }
+
+        if (isAllEquals && colorList.size() > 1) {
+            return tempColor;
+        }
+
+        tempColor = primitives.Color.BLACK;
+        for (Point center : nextCenterPList) {
+            tempColor = tempColor.add(adaptiveSuperSamplingRec(center, width / 2, height / 2, minWidth, minHeight, cornersList));
+        }
+        return tempColor.reduce(nextCenterPList.size());
+    }
+
+    private boolean isInList(List<Point> pointsList, Point point) {
+        for (Point tempPoint : pointsList) {
+            if (point.isAlmostEquals(tempPoint)) return true;
+        }
+        return false;
+    }
+
+    public Camera setMultithreading(int threads) {
+        if (threads < 0) throw new IllegalArgumentException("Multithreading parameter must be 0 or higher");
+        if (threads != 0) {
+            this.threads = threads;
+        } else {
+            int cores = Runtime.getRuntime().availableProcessors() - SPARE_THREADS;
+            this.threads = cores <= 2 ? 1 : cores;
+        }
+        return this;
+    }
+
     /**
      * Casts a ray through the given pixel (i,j) on the view plane and returns the
      * color that results from tracing the ray.
@@ -346,7 +524,7 @@ public class Camera implements Cloneable{
         imageWriter.writeToImage();
         return this;
     }
-    private void renderImageBeam()
+    public void renderImageBeam()
     {//track rays, if its a beam and more
 
         if (imageWriter == null)
@@ -354,6 +532,8 @@ public class Camera implements Cloneable{
         if (rayTracer == null)
             throw new MissingResourceException(RESOURCE, CAMERA_CLASS, RAY_TRACER);
 
+        //if(numOfRaysSuperSampeling==0||numOfRaysSuperSampeling==1)//no supersampeling
+        //renderImage();//calls for creating the picture
 
         //else,supersampleing
         //runs on all the image
@@ -361,15 +541,24 @@ public class Camera implements Cloneable{
         {
             for(int j=0;j<imageWriter.getNy();j++)
             {
+//                if(numOfRays == 1 || numOfRays == 0)
+//                {
+//                    Ray ray = constructRay(imageWriter.getNx(), imageWriter.getNy(), j, i);
+//                    Color rayColor = rayTracer.traceRay(ray);
+//                    imageWriter.writePixel(j, i, rayColor);
+//                }
                 //creating a list of all the rays in the beam, calculating their color and eriting the image
-
-                List<Ray> rays = constructBeamForEacjPixel(imageWriter.getNx(), imageWriter.getNy(), j, i,numOfRaysSuperSampeling);
-                Color rayColor = rayTracer.traceRay(rays);//new func,gets a list of rays
-                imageWriter.writePixel(j, i, rayColor);
+//                else {
+                    List<Ray> rays = constructBeamForEacjPixel(imageWriter.getNx(), imageWriter.getNy(), j, i,numOfRaysSuperSampeling);
+                    Color rayColor = rayTracer.traceRay(rays);//new func,gets a list of rays
+                    imageWriter.writePixel(j, i, rayColor);
+//                }
             }
         }
     }
-    public List<Ray> constructBeamForEacjPixel(int nX, int nY, int j, int i, int raysAmountSuper)
+
+
+public List<Ray> constructBeamForEacjPixel(int nX, int nY, int j, int i, int raysAmountSuper)
     {
         if(isZero(distance))
             throw new IllegalArgumentException(DISTANCE);
