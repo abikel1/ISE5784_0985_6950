@@ -204,7 +204,7 @@ public class ReflectionRefractionTests {
                 .setImageWriter(new ImageWriter("TeddyBearAntiAliasing", 500, 500))
                 .setRayTracer(new SimpleRayTracer(scene))
                 .build();
-                camera.setAntialising(true).setnumOfRaysSuperSampeling(100);
+                camera.setAntialising(true).setnumOfRaysSuperSampeling(1000);
 
         scene.geometries.add(
                 // ears
@@ -303,7 +303,7 @@ public class ReflectionRefractionTests {
                 .setImageWriter(new ImageWriter("TeddyBearAntiAliasingAdaptive", 500, 500))
                 .setRayTracer(new SimpleRayTracer(scene))
                 .build();
-        camera.setAntialising(true).setAdaptiveSuperSamplingFlag(true).setMultithreading(4).setNumOfRays(1024);
+        camera.setAntialising(true).setAdaptiveSuperSamplingFlag(true).setMultithreading(4).setNumOfRays(2000);
 
         scene.geometries.add(
                 // ears

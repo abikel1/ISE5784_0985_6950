@@ -77,70 +77,6 @@ public class Camera implements Cloneable{
         return this;
     }
 
-    private class Pixel {
-        private long maxMunRows;
-        private long maxMunCols;
-        private long pixels;
-        public volatile int row = 0;
-        public volatile int col = -1;
-        private long counter = 0;
-        private int percent = 0;
-        private long nextCounter = 0;
-
-        public Pixel(int row, int col) {
-            this.maxMunRows = row;
-            this.maxMunCols = col;
-            this.pixels = maxMunCols * maxMunRows;
-            this.nextCounter = pixels / 100;
-            if (print) {
-                System.out.printf("\r %02d%%", percent);
-            }
-        }
-
-        public Pixel() {}
-
-        public boolean nextPixel(Pixel p) {
-            int percent = nextp(p);
-            if (percent > 0 && print) {
-                synchronized (System.out) {
-                    System.out.printf("\r %02d%%", percent);
-                }
-            }
-            if (percent >= 0) return true;
-            if (print) {
-                synchronized (System.out) {
-                    System.out.printf("\r %02d%%", 100);
-                }
-            }
-            return false;
-        }
-
-        private synchronized int nextp(Pixel target) {
-            col++;
-            counter++;
-            if (col < maxMunCols) {
-                target.row = this.row;
-                target.col = this.col;
-                if (counter == nextCounter) {
-                    percent++;
-                    nextCounter = pixels * (percent + 1) / 100;
-                    return percent;
-                }
-                return 0;
-            }
-            row++;
-            if (row < maxMunRows) {
-                col = 0;
-                if (counter == nextCounter) {
-                    percent++;
-                    nextCounter = pixels * (percent + 1) / 100;
-                    return percent;
-                }
-                return 0;
-            }
-            return -1;
-        }
-    }
 
 
     private Camera(){}
@@ -381,7 +317,7 @@ public class Camera implements Cloneable{
         int nX = imageWriter.getNx();
         int nY = imageWriter.getNy();
 
-        final Pixel thePixel = new Pixel(nY, nX);
+        final Pixel thePixel = new Pixel(nY, nX,true);
         Thread[] threads = new Thread[this.threads];
         for (int i = 0; i < this.threads; i++) {
             threads[i] = new Thread(() -> {
