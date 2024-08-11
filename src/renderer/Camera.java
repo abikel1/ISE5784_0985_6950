@@ -27,7 +27,7 @@ public class Camera implements Cloneable{
     private final String RAY_TRACER = "Ray tracer";
     private final String DISTANCE = "camera cant be in distance 0";
     /**
-     * turn on - off antialising super sampling
+     * turn on - off antialising super samplin
      */
     private boolean isAntialising= false;//indicates of to improve the picture with antialising or not. the default is not.
     /**
